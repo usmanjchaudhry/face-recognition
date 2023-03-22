@@ -8,6 +8,7 @@
   import FaceRecognition from './components/FaceRecognition/FaceRecognition';
   import { useState, useEffect } from 'react';
   import SignIn from './components/SignIn/SignIn';
+  import Register from './components/Register/Register';
 
 
 
@@ -21,13 +22,18 @@
     const [data, setData] = useState({});
     const [box,setBox] = useState({})
     const [route, setRoute] = useState('SignIn')
+    const [isSignedIn, setSignedIn] = useState(false)
 
 
 
-    const onRouteChange = () =>{
-  
-      setRoute('Home')
 
+    const onRouteChange = (route) =>{
+      if(route === 'signout'){
+        setSignedIn(false)
+      } else if ( route === 'home'){
+        setSignedIn(true)
+      }
+          setRoute(route)
       
     }
 
@@ -106,17 +112,30 @@
 
   return (
     <div className='App'>
-      <Navigation onRouteChange={onRouteChange} />
-      {route === 'SignIn' ? (
-        <SignIn onRouteChange={onRouteChange} />
-      ) : (
+      <Navigation onRouteChange={onRouteChange} isSignedIn={isSignedIn} />
+
+
+
+      {route === 'home' ? (
         <div>
           <Logo/> 
           <Rank/>
           <ImageLinkForm onInputChange={onInputChange} onButtonSubmit={onButtonSubmit}/>
           <FaceRecognition box={box} imageURL={imageURL}/> 
         </div>
+      ):(
+        route === 'SignIn' ?
+          <SignIn onRouteChange={onRouteChange} />
+          : <Register onRouteChange={onRouteChange}/>
+
+
+
+        
       )}
+
+
+
+      
       <ParticlesBg type="circle" bg={true} />
     </div>
   );

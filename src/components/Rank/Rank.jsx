@@ -1,19 +1,25 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react';
 
-const Rank = () =>{
-    return(
-     <div>
-       <div className='white f3'>
-            {'Usman, your current rank is...'}
-       </div>
-       <div className='white f1'>
-            {'#5'}
-       </div>
-     </div>
-     
-      
-        )
-}
+const Rank = ({ user }) => {
+  const [entries, setEntries] = useState(user.entries);
+
+  useEffect(() => {
+    setEntries(user.entries);
+  }, [user.entries]);
+
+  console.log(user.entries)
 
 
-export default Rank
+  return (
+    <div>
+      <div className='white f3'>
+        {`${user.name}, your current entry count is...`}
+      </div>
+      <div className='white f1'>
+        {entries}
+      </div>
+    </div>
+  );
+};
+
+export default Rank;

@@ -23,10 +23,28 @@
     const [box,setBox] = useState({})
     const [route, setRoute] = useState('SignIn')
     const [isSignedIn, setSignedIn] = useState(false)
+    const [user, setUser] = useState({
+      id: '',
+      name: '',
+      email: '',
+      entries: 0,
+      joined: ''
+
+    })
 
 
+     const loadUser = (user) =>{
+       setUser({
+  id:user.id,
+  name:user.name,
+  email: user.email,
+  entries: user.entries,
+  joined: user.joined
+})
+    }
 
 
+    
     const onRouteChange = (route) =>{
       if(route === 'signout'){
         setSignedIn(false)
@@ -43,7 +61,6 @@
       const image = document.getElementById('inputImage')
       const width = Number(image?.width || 0)
       const height = Number(image?.height || 0)
-      console.log(width,height)
       return{
         leftCol: clarifaiFace.left_col * width,
         topRow: clarifaiFace.top_row * height,
@@ -52,15 +69,11 @@
 
       }
     }
-    console.log(box)
     const onInputChange = (event) => {
-      console.log(event.target.value);
       setInput(event.target.value);
-      console.log(input)
     }
 
     useEffect(() => {
-      console.log(input);
     }, []);
 
     const onButtonSubmit = () =>{
@@ -96,17 +109,49 @@
   // https://api.clarifai.com/v2/models/{YOUR_MODEL_ID}/outputs
   // this will default to the latest version_id
 
-  fetch(`https://api.clarifai.com/v2/models/face-detection/versions/6dc7e46bc9124c5c8824be4822abe105/outputs`, requestOptions)
-      .then(response => response.json()) 
-      .then(result => {
-        const boundingBox = result.outputs[0].data.regions[0].region_info.bounding_box;
-        setData(boundingBox);
+    fetch(`https://api.clarifai.com/v2/models/face-detection/versions/6dc7e46bc9124c5c8824be4822abe105/outputs`, requestOptions)
+    
+
+    .then(response => response.json()) 
+    
+  
+    
+
+    .then(result => {
+      const boundingBox = result.outputs[0].data.regions[0].region_info.bounding_box;
+      setData(boundingBox);
     })
+
+    
+ 
     .catch(error => console.log('error', error))
   }
 
+
+
+
   useEffect(() => {
-  console.log(data);
+    if(data){
+      fetch('http://localhost:3000/image', {
+        method: 'put',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            id:user.id
+        })
+    })
+    .then(response => response.json())
+    .then(count => {
+      setUser(prevState => ({
+        ...prevState,
+        entries: count
+      }));
+    })
+    .catch(error => console.log('error', error));
+  } else {
+    console.log('error');
+  }
+
+    
   setBox(calculateFaceLocation(data))
   }, [data]);
 
@@ -119,14 +164,14 @@
       {route === 'home' ? (
         <div>
           <Logo/> 
-          <Rank/>
+          <Rank name={user.name} entries={user.entries} user={user} />
           <ImageLinkForm onInputChange={onInputChange} onButtonSubmit={onButtonSubmit}/>
           <FaceRecognition box={box} imageURL={imageURL}/> 
         </div>
       ):(
         route === 'SignIn' ?
-          <SignIn onRouteChange={onRouteChange} />
-          : <Register onRouteChange={onRouteChange}/>
+          <SignIn onRouteChange={onRouteChange} loadUser={loadUser}/>
+          : <Register onRouteChange={onRouteChange} loadUser = {loadUser} />
 
 
 
